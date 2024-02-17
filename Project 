@@ -7,8 +7,6 @@
 #define ANSI_COLOR_GREEN   "\x1b[32m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
 
-void displayMenu(int selectedOption);
-void clearScreen();
 
 struct Stack {
     int data[MAX_SIZE];
@@ -286,9 +284,6 @@ void displayMenu() {
 
     /***** Menu Options *****/
     printf("1. Array\n");
-    if (selectedOption == 1){
-    	printf (ANSI_COLOR_GREEN);
-    }
     printf("2. Binary tree\n");
     printf("3. Queue\n");
     printf("4. Stack\n");
@@ -296,9 +291,7 @@ void displayMenu() {
 }
 
 int main() {
-    int choice = 0;
-    clearScreen();
-    displayMenu(choice);
+    int choice ;
 
     while (1) {
         displayMenu();
