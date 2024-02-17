@@ -1,0 +1,331 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_SIZE 5
+
+#define ANSI_COLOR_RED     "\x1b[31m"
+#define ANSI_COLOR_GREEN   "\x1b[32m"
+#define ANSI_COLOR_RESET   "\x1b[0m"
+
+void displayMenu(int selectedOption);
+void clearScreen();
+
+struct Stack {
+    int data[MAX_SIZE];
+    int top;
+};
+
+void initialize(struct Stack *stack) {
+    stack->top = -1;
+}
+
+int isEmpty(struct Stack *stack) {
+    return (stack->top == -1);
+}
+
+int isFull(struct Stack *stack) {
+    return (stack->top == MAX_SIZE - 1);
+}
+
+void push(struct Stack *stack, int value) {
+    if (isFull(stack)) {
+        printf("Stack Overflow\n");
+        return;
+    }
+    stack->data[++stack->top] = value;
+}
+
+int pop(struct Stack *stack) {
+    if (isEmpty(stack)) {
+        printf("Stack Underflow\n");
+        exit(1);
+    }
+    return stack->data[stack->top--];
+}
+
+struct BTnode {
+    int data;
+    struct BTnode* leftNode;
+    struct BTnode* rightNode;
+};
+
+void inorder(struct BTnode* rootNode) {
+    if (rootNode == NULL) return;
+    inorder(rootNode->leftNode);
+    printf("%d ->", rootNode->data);
+    inorder(rootNode->rightNode);
+}
+
+void preorder(struct BTnode* rootNode) {
+    if (rootNode == NULL) return;
+    printf("%d ->", rootNode->data);
+    preorder(rootNode->leftNode);
+    preorder(rootNode->rightNode);
+}
+
+void postorder(struct BTnode* rootNode) {
+    if (rootNode == NULL) return;
+    postorder(rootNode->leftNode);
+    postorder(rootNode->rightNode);
+    printf("%d ->", rootNode->data);
+}
+
+struct BTnode* createNode(int value) {
+    struct BTnode* newNode = (struct BTnode*)malloc(sizeof(struct BTnode));
+    if (newNode == NULL) {
+        printf("Memory allocation failed.\n");
+        exit(EXIT_FAILURE);
+    }
+    newNode->data = value;
+    newNode->leftNode = NULL;
+    newNode->rightNode = NULL;
+    return newNode;
+}
+
+struct BTnode* insertLeftNode(struct BTnode* rootNode, int value) {
+    rootNode->leftNode = createNode(value);
+    return rootNode->leftNode;
+}
+
+struct BTnode* insertRightNode(struct BTnode* rootNode, int value) {
+    rootNode->rightNode = createNode(value);
+    return rootNode->rightNode;
+}
+
+/****** Array ******/
+void handleArray() {
+  int arr[5];
+    int sum = 0;
+
+    printf("Enter 5 numbers: \n");
+
+    for (int i = 0; i < 5; i++) {
+        scanf("%d", &arr[i]);
+    }
+
+    for (int i = 0; i < 5; i++) {
+        sum += arr[i];
+    }
+
+    printf("The sum of 5 numbers: %d\n", sum);
+}
+
+/***** Binary Tree *****/
+void handleBinaryTree() {
+    int value;
+    printf("Enter the root node value: ");
+    scanf("%d", &value);
+    struct BTnode* rootNode = createNode(value);
+
+    int choice;
+    do {
+        printf("\n1. Insert left child\n");
+        printf("2. Insert right child\n");
+        printf("3. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Enter the value for the left child: ");
+                scanf("%d", &value);
+                insertLeftNode(rootNode, value);
+                break;
+            case 2:
+                printf("Enter the value for the right child: ");
+                scanf("%d", &value);
+                insertRightNode(rootNode, value);
+                break;
+            case 3:
+                printf("Exiting...\n");
+                break;
+            default:
+                printf("Invalid choice! Please enter a valid option.\n");
+        }
+    } while (choice != 3);
+
+    printf("\nInorder Traversal: ");
+    inorder(rootNode);
+    printf("\nPreorder Traversal: ");
+    preorder(rootNode);
+    printf("\nPostorder Traversal: ");
+    postorder(rootNode);
+}
+
+/***** Stack ******/
+void handleStack() {
+    struct Stack stack;
+    initialize(&stack);
+
+    int num, count = 0;
+
+    printf("Enter 1 to 5 numbers:\n");
+
+    while (count < MAX_SIZE && scanf("%d", &num) == 1) {
+        push(&stack, num);
+        count++;
+    }
+
+    if (count < 1 || count > MAX_SIZE) {
+        printf("Invalid number of inputs. Please enter 1 to 5 numbers.\n");
+        return;
+    }
+
+    printf("The top element is %d\n", stack.data[stack.top]);
+
+    if (count > 1) {
+        printf("The middle element(s) are: ");
+        for (int i = 1; i <= stack.top; i++) {
+            printf("%d ", stack.data[i]);
+        }
+        printf("\n");
+    } else {
+        printf("There are no middle elements in the stack.\n");
+    }
+
+    printf("The bottom element is %d\n", stack.data[0]);
+}
+
+struct Queue {
+    int items[MAX_SIZE];
+    int front;
+    int rear;
+    int size;
+};
+
+struct Queue* createQueue() {
+    struct Queue* queue = (struct Queue*)malloc(sizeof(struct Queue));
+    queue->front = -1;
+    queue->rear = -1;
+    queue->size = 0;
+    return queue;
+}
+
+int isFullQueue(struct Queue* queue) {
+    return queue->size == MAX_SIZE;
+}
+
+int isEmptyQueue(struct Queue* queue) {
+    return queue->size == 0;
+}
+
+/****** Enqueue *****/
+void enqueue(struct Queue* queue, int value) {
+    if (isFullQueue(queue)) {
+        printf("Queue is full. Removing oldest element.\n");
+        queue->front = (queue->front + 1) % MAX_SIZE;
+        queue->size--;
+    }
+
+    if (isEmptyQueue(queue)) {
+        queue->front = 0;
+        queue->rear = 0;
+    } else {
+        queue->rear = (queue->rear + 1) % MAX_SIZE;
+    }
+
+    queue->items[queue->rear] = value;
+    queue->size++;
+    printf("%d enqueued to queue.\n", value);
+}
+
+/****** Dequeue ******/
+int dequeue(struct Queue* queue) {
+    int item;
+    if (isEmptyQueue(queue)) {
+        printf("Queue is empty. Cannot dequeue.\n");
+        return -1;
+    }
+
+    item = queue->items[queue->front];
+    queue->front = (queue->front + 1) % MAX_SIZE; 
+    queue->size--;
+    return item;
+}
+
+/***** Queue ******/
+void handleQueue() {
+    struct Queue* queue = createQueue();
+    int element;
+
+    printf("Enter 5 elements to enqueue:\n");
+    for (int i = 0; i < 5; i++) {
+        printf("Element %d: ", i + 1);
+        scanf("%d", &element);
+        enqueue(queue, element);
+    }
+
+    printf("\nAttempting to enqueue another element:\n");
+    printf("Enter element to enqueue: ");
+    scanf("%d", &element);
+    enqueue(queue, element);
+
+    printf("\nDequeuing all elements:\n");
+    while (!isEmptyQueue(queue)) {
+        element = dequeue(queue);
+        printf("%d dequeued from queue.\n", element);
+    }
+}
+
+void displayMenu() {
+    
+    printf(ANSI_COLOR_RED "          __                                      \n");
+    printf("        ,'  , `.                                    \n");
+    printf("     ,-+-,.' _ |                                    \n");
+    printf("  ,-+-. ;   , ||              ,---,          ,--,  \n");
+    printf(" ,--.'|'   |  ;|          ,-+-. /  |       ,'_ /|  \n");
+    printf("|   |  ,', |  ':  ,---.  ,--.'|'   |  .--. |  | :  \n");
+    printf("|   | /  | |  || /     \\|   |  ,\"' |,'_ /| :  . |  \n");
+    printf("'   | :  | :  |,/    /  |   | /  | ||  ' | |  . .  \n");
+    printf(";   . |  ; |--'.    ' / |   | |  | ||  | ' |  | |  \n");
+    printf("|   : |  | ,   '   ;   /|   | |  |/ :  | : ;  ; |  \n");
+    printf("|   : '  |/    '   |  / |   | |--'  '  :  `--'  | \n");
+    printf(";   | |`-'     |   :    |   |/      :  ,        |\n");
+    printf("|   ;/          \\   \\  /'---'        `--`____/     \n");
+    printf("'---'            `----' \n" ANSI_COLOR_RESET "\n");
+
+    /***** Menu Options *****/
+    printf("1. Array\n");
+    if (selectedOption == 1){
+    	printf (ANSI_COLOR_GREEN);
+    }
+    printf("2. Binary tree\n");
+    printf("3. Queue\n");
+    printf("4. Stack\n");
+    printf("5. Exit\n");
+}
+
+int main() {
+    int choice = 0;
+    clearScreen();
+    displayMenu(choice);
+
+    while (1) {
+        displayMenu();
+
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch(choice) {
+            case 1:
+                handleArray();
+                break;
+            case 2:
+                handleBinaryTree();
+                break;
+            case 3:
+                handleQueue();
+                break;
+            case 4:
+                handleStack();
+                break;
+            case 5:
+                printf("Exiting...\n");
+                exit(0);
+            default:
+                printf("Invalid choice. Please enter a number between 1 and 5.\n");
+        }
+    }
+
+    return 0;
+}
